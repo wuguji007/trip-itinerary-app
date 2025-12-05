@@ -42,7 +42,7 @@
             background-position: 0 0, 10px 10px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             position: relative;
-            padding-bottom: 6rem; /* 調整回原本的底部間距 */
+            padding-bottom: 6rem;
         }
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -87,27 +87,43 @@
         .tag-stay { background-color: #F3E5F5; color: #7B1FA2; }
         .tag-transport { background-color: #FFF3E0; color: #EF6C00; }
 
-        .translate-fab {
+        /* 懸浮按鈕共用樣式 */
+        .fab-btn {
             position: fixed;
-            bottom: 20px;
             right: 20px;
-            background-color: #4285F4;
-            color: white;
             width: 60px;
             height: 60px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             z-index: 50;
             transition: transform 0.2s;
             border: 3px solid white;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
         }
+        
         @media (min-width: 768px) {
-            .translate-fab { right: calc(50% - 14rem + 20px); }
+            .fab-btn { right: calc(50% - 14rem + 20px); }
         }
-        .translate-fab:hover { transform: scale(1.1) rotate(10deg); }
+
+        .fab-btn:hover { transform: scale(1.1); }
+        .fab-btn:active { transform: scale(0.95); }
+
+        /* 翻譯按鈕 (原本的) */
+        .translate-fab {
+            bottom: 20px;
+            background-color: #4285F4;
+        }
+
+        /* 匯率按鈕 - 放在翻譯按鈕上方 */
+        .currency-fab {
+            bottom: 95px; /* 20px + 60px + 15px gap */
+            background-color: #4CAF50;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -124,6 +140,37 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 匯率計算機樣式 */
+        .currency-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #EEE;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--text-brown);
+            background-color: #FAFAFA;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .currency-input:focus {
+            border-color: var(--primary-orange);
+            background-color: #FFF;
+        }
+        .quick-btn {
+            background-color: #FFF;
+            border: 1px solid #DDD;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .quick-btn:active {
+            background-color: #EEE;
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -160,16 +207,23 @@
             </div>
         </main>
 
-        <a href="https://translate.google.com/?sl=auto&tl=ko&op=translate" target="_blank" class="translate-fab" title="Google 翻譯">
+        <button onclick="switchTab('currency')" class="fab-btn currency-fab" title="匯率換算">
+            <i class="fa-solid fa-calculator text-2xl"></i>
+        </button>
+
+        <a href="https://translate.google.com/?sl=auto&tl=ko&op=translate" target="_blank" class="fab-btn translate-fab" title="Google 翻譯">
             <i class="fa-solid fa-language text-2xl"></i>
         </a>
     </div>
 
     <script>
-        const SHEET_CSV_URL =  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSTEs6icuXX2w4iv1LerMbeW4EEDFqUJY_BdcVha7DEAMVtPXQ5blIHKZIIMK8U0O5pOV-rDO84Hns/pub?output=csv';
-
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSTEs6icuXX2w4iv1LerMbeW4EEDFqUJY_BdcVha7DEAMVtPXQ5blIHKZIIMK8U0O5pOV-rDO84Hns/pub?output=csv';
+        
         let tripData = [];
         let activeIndex = 0; 
+        // 預設匯率 (1 TWD = 42.5 KRW)
+        let exchangeRate = 42.5;
+
         const tabsContainer = document.getElementById('tabs-container');
         const contentArea = document.getElementById('content-area');
         const tripDatesEl = document.getElementById('trip-dates');
@@ -254,12 +308,20 @@
 
         function renderTabs() {
             let html = '';
+            // 1. 行程頁籤
             tripData.forEach((item, index) => {
                 const isActive = index === activeIndex ? 'active' : 'bg-white text-[var(--text-brown)]';
                 html += `<button onclick="switchTab(${index})" class="tab-btn px-5 py-2 rounded-full text-sm font-bold shadow-sm border-2 border-transparent ${isActive}">${item.date} (${item.day})</button>`;
             });
+
+            // 2. 匯率頁籤
+            const isCurrencyActive = activeIndex === 'currency' ? 'active' : 'bg-[#C8E6C9] text-[var(--text-brown)]';
+            html += `<button onclick="switchTab('currency')" class="tab-btn px-5 py-2 rounded-full text-sm font-bold shadow-sm border-2 border-white ${isCurrencyActive}"><i class="fa-solid fa-calculator mr-1"></i> 韓幣⇄台幣</button>`;
+
+            // 3. 注意事項頁籤
             const isNoteActive = activeIndex === 'notes' ? 'active' : 'bg-[#FFCC80] text-[var(--text-brown)]';
             html += `<button onclick="switchTab('notes')" class="tab-btn px-5 py-2 rounded-full text-sm font-bold shadow-sm border-2 border-white ${isNoteActive}"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 注意事項</button>`;
+            
             tabsContainer.innerHTML = html;
         }
 
@@ -267,18 +329,127 @@
             activeIndex = index;
             renderTabs();
             renderContent(index);
+            
+            // 頁籤滾動定位邏輯
             const buttons = tabsContainer.querySelectorAll('button');
-            const targetBtn = (index === 'notes') ? buttons[buttons.length - 1] : buttons[index];
+            let targetBtn;
+            if (index === 'currency') {
+                targetBtn = buttons[buttons.length - 2]; // 倒數第二個
+            } else if (index === 'notes') {
+                targetBtn = buttons[buttons.length - 1]; // 最後一個
+            } else {
+                targetBtn = buttons[index];
+            }
+            
             if(targetBtn) targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        };
+
+        // 渲染匯率計算機
+        function renderCurrencyConverter() {
+            const html = `
+                <div class="animate-fade-in space-y-5">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-[var(--text-brown)]">匯率換算</h2>
+                        <p class="text-sm opacity-70">快速換算購物金額</p>
+                    </div>
+
+                    <div class="info-card p-6 space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-500 mb-2">₩ 韓幣 (KRW)</label>
+                            <div class="relative">
+                                <input type="number" id="input-krw" placeholder="輸入韓幣金額" class="currency-input" oninput="calculate('krw')">
+                                <span class="absolute right-4 top-3 text-gray-400 font-bold">₩</span>
+                            </div>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <button onclick="setKrw(1000)" class="quick-btn">+1千</button>
+                                <button onclick="setKrw(5000)" class="quick-btn">+5千</button>
+                                <button onclick="setKrw(10000)" class="quick-btn">+1萬</button>
+                                <button onclick="setKrw(50000)" class="quick-btn">+5萬</button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center text-gray-300">
+                            <i class="fa-solid fa-arrow-right-arrow-left rotate-90 text-2xl"></i>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-500 mb-2">$ 台幣 (TWD)</label>
+                            <div class="relative">
+                                <input type="number" id="input-twd" placeholder="換算結果" class="currency-input" oninput="calculate('twd')">
+                                <span class="absolute right-4 top-3 text-gray-400 font-bold">NT$</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100">
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span>目前匯率設定：1 台幣 = <input type="number" id="rate-input" value="${exchangeRate}" class="w-16 border-b border-gray-300 text-center text-black font-bold focus:outline-none" onchange="updateRate(this.value)"> 韓幣</span>
+                                <button onclick="resetRate()" class="text-blue-500 text-xs hover:underline">重置</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-xl text-sm text-blue-800 flex gap-3">
+                        <i class="fa-solid fa-lightbulb mt-1"></i>
+                        <p>小撇步：將韓幣去掉最後一個 0，再除以 4，大約就是台幣價格喔！<br>(例：10,000 韓幣 ≈ 250 台幣)</p>
+                    </div>
+                </div>
+            `;
+            contentArea.innerHTML = html;
+        }
+
+        // 匯率計算邏輯
+        window.calculate = function(source) {
+            const krwInput = document.getElementById('input-krw');
+            const twdInput = document.getElementById('input-twd');
+            
+            if (source === 'krw') {
+                const krw = parseFloat(krwInput.value);
+                if (!isNaN(krw)) {
+                    // 韓幣轉台幣：除以匯率
+                    const twd = krw / exchangeRate;
+                    twdInput.value = Math.round(twd); // 取整數
+                } else {
+                    twdInput.value = '';
+                }
+            } else {
+                const twd = parseFloat(twdInput.value);
+                if (!isNaN(twd)) {
+                    // 台幣轉韓幣：乘以匯率
+                    const krw = twd * exchangeRate;
+                    krwInput.value = Math.round(krw);
+                } else {
+                    krwInput.value = '';
+                }
+            }
+        };
+
+        window.setKrw = function(amount) {
+            const krwInput = document.getElementById('input-krw');
+            let current = parseFloat(krwInput.value) || 0;
+            krwInput.value = current + amount;
+            calculate('krw'); // 觸發計算
+        };
+
+        window.updateRate = function(newRate) {
+            const rate = parseFloat(newRate);
+            if (!isNaN(rate) && rate > 0) {
+                exchangeRate = rate;
+                calculate('krw'); // 重新計算
+            }
+        };
+
+        window.resetRate = function() {
+            exchangeRate = 42.5;
+            document.getElementById('rate-input').value = exchangeRate;
+            calculate('krw');
         };
 
         function renderContent(index) {
             contentArea.innerHTML = '';
             
-            if (index === 'notes') { 
-                renderNotes(); 
-                return; 
-            }
+            // 處理特殊頁籤
+            if (index === 'notes') { renderNotes(); return; }
+            if (index === 'currency') { renderCurrencyConverter(); return; }
 
             const dayData = tripData[index];
             const info = dayData.data;
@@ -339,7 +510,7 @@
                 contentHtml += `<div class="bg-yellow-100 border-l-4 border-yellow-400 p-4 rounded-r-xl mt-4"><div class="flex items-start gap-2"><i class="fa-solid fa-circle-info text-yellow-600 mt-1"></i><p class="text-yellow-800 font-medium">${info.notes}</p></div></div>`;
             }
             
-            contentHtml += `</div>`; // 結束 .animate-fade-in
+            contentHtml += `</div>`;
             contentArea.innerHTML = contentHtml;
         }
 
