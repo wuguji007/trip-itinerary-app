@@ -1,0 +1,382 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韓國釜山6天5夜之旅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!--  mobile app -->
+    <link rel="icon" type="image/png" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
+    <!--  mobile app -->
+
+
+    <style>
+        :root {
+            --primary-orange: #FF9800;
+            --soft-orange: #FFE0B2;
+            --cream-bg: #FFF8E1;
+            --text-brown: #5D4037;
+            --accent-yellow: #FFEB3B;
+            --card-white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background-color: #f3f4f6;
+            color: var(--text-brown);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 28rem;
+            min-height: 100vh;
+            background-color: var(--cream-bg);
+            background-image: radial-gradient(var(--soft-orange) 15%, transparent 16%), radial-gradient(var(--soft-orange) 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            padding-bottom: 6rem; /* 調整回原本的底部間距 */
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .hero-section {
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; }
+        .tab-btn.active {
+            background-color: var(--text-brown);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px rgba(93, 64, 55, 0.2);
+        }
+
+        .info-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(93, 64, 55, 0.08);
+            border: 2px solid white;
+            transition: transform 0.2s;
+        }
+        .info-card:active { transform: scale(0.98); }
+
+        .tag {
+            border-radius: 12px;
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .tag-flight { background-color: #E1F5FE; color: #0277BD; }
+        .tag-food { background-color: #FBE9E7; color: #D84315; }
+        .tag-spot { background-color: #E8F5E9; color: #2E7D32; }
+        .tag-stay { background-color: #F3E5F5; color: #7B1FA2; }
+        .tag-transport { background-color: #FFF3E0; color: #EF6C00; }
+
+        .translate-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4285F4;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4);
+            z-index: 50;
+            transition: transform 0.2s;
+            border: 3px solid white;
+        }
+        @media (min-width: 768px) {
+            .translate-fab { right: calc(50% - 14rem + 20px); }
+        }
+        .translate-fab:hover { transform: scale(1.1) rotate(10deg); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-orange);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <header class="hero-section text-white p-6 pt-10 relative overflow-hidden">
+            <div class="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white opacity-20 rounded-full"></div>
+            <div class="absolute bottom-[10px] left-[-10px] w-16 h-16 bg-white opacity-20 rounded-full"></div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-plane-departure text-xl"></i>
+                    <span class="text-sm font-bold tracking-wider opacity-90">KOREA TRIP</span>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">韓國釜山 6天5夜</h1>
+                <p id="trip-dates" class="text-white/90 text-sm font-medium flex items-center gap-2">
+                    <i class="fa-regular fa-calendar"></i>
+                    載入中...
+                </p>
+            </div>
+        </header>
+
+        <nav class="sticky top-0 z-40 bg-[var(--cream-bg)]/95 backdrop-blur-sm pt-4 pb-2 px-4 shadow-sm">
+            <div class="flex overflow-x-auto hide-scrollbar gap-3 pb-2" id="tabs-container">
+                <div class="w-full flex justify-center py-2">
+                    <span class="text-sm text-gray-400">正在讀取行程表...</span>
+                </div>
+            </div>
+        </nav>
+
+        <main class="px-4 py-4" id="content-area">
+            <div class="flex flex-col items-center justify-center h-40">
+                <div class="loader mb-3"></div>
+                <p class="text-[var(--text-brown)] font-bold">正在從 Google Sheet 下載最新行程...</p>
+            </div>
+        </main>
+
+        <a href="https://translate.google.com/?sl=auto&tl=ko&op=translate" target="_blank" class="translate-fab" title="Google 翻譯">
+            <i class="fa-solid fa-language text-2xl"></i>
+        </a>
+    </div>
+
+    <script>
+        require("dotenv").config();
+        const SHEET_CSV_URL = process.env.CSV_URL;
+
+        let tripData = [];
+        let activeIndex = 0; 
+        const tabsContainer = document.getElementById('tabs-container');
+        const contentArea = document.getElementById('content-area');
+        const tripDatesEl = document.getElementById('trip-dates');
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            for(let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if(!line) continue;
+                const row = [];
+                let currentVal = '';
+                let inQuote = false;
+                for(let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if(char === '"') { inQuote = !inQuote; } 
+                    else if(char === ',' && !inQuote) { row.push(currentVal); currentVal = ''; } 
+                    else { currentVal += char; }
+                }
+                row.push(currentVal);
+                const cleanRow = row.map(cell => {
+                    let val = cell.trim();
+                    if(val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+                    if(val === 'null') return '';
+                    return val;
+                });
+                while(cleanRow.length < 8) cleanRow.push("");
+                
+                const dateStr = cleanRow[0];
+                let fullDateStr = dateStr;
+                if(dateStr && dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    const month = parts[0].padStart(2, '0');
+                    const day = parts[1].padStart(2, '0');
+                    fullDateStr = `2026-${month}-${day}`;
+                }
+
+                result.push({
+                    date: dateStr,
+                    day: cleanRow[1],
+                    fullDate: fullDateStr,
+                    type: "itinerary",
+                    data: {
+                        itinerary: cleanRow[2],
+                        accommodation: cleanRow[3],
+                        transportation: cleanRow[4],
+                        lunch: cleanRow[5],
+                        dinner: cleanRow[6],
+                        notes: cleanRow[7]
+                    }
+                });
+            }
+            return result;
+        }
+
+        async function initApp() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                if (!response.ok) throw new Error("網路回應錯誤");
+                const csvText = await response.text();
+                tripData = parseCSV(csvText);
+                if (tripData.length > 0) {
+                    updateHeaderDates();
+                    renderTabs();
+                    renderContent(0);
+                } else {
+                    contentArea.innerHTML = '<p class="text-center text-red-500">無法解析行程資料</p>';
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                contentArea.innerHTML = `<div class="text-center p-4 text-red-500">無法讀取行程表，請檢查網路</div>`;
+            }
+        }
+
+        function updateHeaderDates() {
+            if(tripData.length > 0) {
+                const start = tripData[0].date;
+                const end = tripData[tripData.length - 1].date;
+                tripDatesEl.innerHTML = `<i class="fa-regular fa-calendar"></i> 2026/${start} - ${end}`;
+            }
+        }
+
+        function renderTabs() {
+            let html = '';
+            tripData.forEach((item, index) => {
+                const isActive = index === activeIndex ? 'active' : 'bg-white text-[var(--text-brown)]';
+                html += `<button onclick="switchTab(${index})" class="tab-btn px-5 py-2 rounded-full text-sm font-bold shadow-sm border-2 border-transparent ${isActive}">${item.date} (${item.day})</button>`;
+            });
+            const isNoteActive = activeIndex === 'notes' ? 'active' : 'bg-[#FFCC80] text-[var(--text-brown)]';
+            html += `<button onclick="switchTab('notes')" class="tab-btn px-5 py-2 rounded-full text-sm font-bold shadow-sm border-2 border-white ${isNoteActive}"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 注意事項</button>`;
+            tabsContainer.innerHTML = html;
+        }
+
+        window.switchTab = function(index) {
+            activeIndex = index;
+            renderTabs();
+            renderContent(index);
+            const buttons = tabsContainer.querySelectorAll('button');
+            const targetBtn = (index === 'notes') ? buttons[buttons.length - 1] : buttons[index];
+            if(targetBtn) targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        };
+
+        function renderContent(index) {
+            contentArea.innerHTML = '';
+            
+            if (index === 'notes') { 
+                renderNotes(); 
+                return; 
+            }
+
+            const dayData = tripData[index];
+            const info = dayData.data;
+
+            let contentHtml = `
+                <div class="animate-fade-in space-y-4">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-[var(--text-brown)]">Day ${parseInt(index) + 1}</h2>
+                        <p class="text-sm opacity-70">${dayData.fullDate} 星期${dayData.day}</p>
+                    </div>
+            `;
+
+            if (info.transportation) {
+                contentHtml += `
+                    <div class="info-card p-4 flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0 text-orange-600">
+                            <i class="fa-solid fa-bus"></i>
+                        </div>
+                        <div>
+                            <div class="tag tag-transport mb-1">交通 / 集合</div>
+                            <p class="font-bold text-lg leading-snug">${info.transportation}</p>
+                        </div>
+                    </div>`;
+            }
+
+            if (info.itinerary) {
+                const spots = info.itinerary.split(/、|,|，|\n/).filter(s => s.trim() !== '');
+                contentHtml += `
+                    <div class="info-card p-5 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-green-50 rounded-bl-full -mr-2 -mt-2"></div>
+                        <div class="relative z-10">
+                            <div class="tag tag-spot mb-3"><i class="fa-solid fa-map-location-dot"></i> 景點行程</div>
+                            <ul class="space-y-3">
+                                ${spots.map(spot => `<li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500 text-sm"></i><span class="font-bold text-lg text-gray-700">${spot.trim()}</span></li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>`;
+            }
+
+            if (info.lunch || info.dinner) {
+                contentHtml += `<div class="grid grid-cols-1 gap-4">`;
+                if (info.lunch) contentHtml += `<div class="info-card p-4 flex flex-col"><div class="tag tag-food self-start mb-2">午餐</div><div class="font-bold text-xl text-[var(--text-brown)]">${info.lunch}</div></div>`;
+                if (info.dinner) contentHtml += `<div class="info-card p-4 flex flex-col"><div class="tag tag-food self-start mb-2">晚餐</div><div class="font-bold text-xl text-[var(--text-brown)]">${info.dinner}</div></div>`;
+                contentHtml += `</div>`;
+            }
+
+            if (info.accommodation) {
+                contentHtml += `
+                    <div class="info-card p-4 bg-indigo-50/50 border-indigo-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-indigo-500 shadow-sm"><i class="fa-solid fa-bed"></i></div>
+                            <div><div class="text-xs text-indigo-400 font-bold mb-0.5">住宿</div><div class="font-bold text-lg text-indigo-900">${info.accommodation}</div></div>
+                        </div>
+                    </div>`;
+            }
+
+            if (info.notes) {
+                contentHtml += `<div class="bg-yellow-100 border-l-4 border-yellow-400 p-4 rounded-r-xl mt-4"><div class="flex items-start gap-2"><i class="fa-solid fa-circle-info text-yellow-600 mt-1"></i><p class="text-yellow-800 font-medium">${info.notes}</p></div></div>`;
+            }
+            
+            contentHtml += `</div>`; // 結束 .animate-fade-in
+            contentArea.innerHTML = contentHtml;
+        }
+
+        function renderNotes() {
+            let emergencyHtml = `
+                <div class="animate-fade-in space-y-5">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-[var(--text-brown)]">旅遊注意事項</h2>
+                        <p class="text-sm opacity-70">安全第一，快樂出遊</p>
+                    </div>
+                    <div class="info-card p-5 border-l-8 border-red-400">
+                        <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="fa-solid fa-phone-volume text-red-500"></i> 緊急聯絡</h3>
+                        <div class="space-y-3">
+                            <div class="bg-red-50 p-3 rounded-lg"><div class="text-xs text-gray-500">韓國緊急電話</div><div class="flex justify-between items-center"><span class="font-bold">報警 112 / 火警 119</span></div></div>
+                            <div class="bg-red-50 p-3 rounded-lg"><div class="text-xs text-gray-500">駐韓國台北代表部 (釜山辦事處)</div><div class="font-bold text-lg">051-711-9208</div><div class="text-xs text-red-600 mt-1">緊急行動電話：010-4537-7961</div></div>
+                        </div>
+                    </div>
+                    <div class="info-card p-5">
+                        <h3 class="font-bold text-lg mb-2 text-[var(--text-brown)]"><i class="fa-solid fa-passport text-blue-500"></i> 護照遺失處理</h3>
+                        <ol class="list-decimal list-inside text-sm space-y-2 text-gray-600">
+                            <li>前往最近的警察局報案，取得「遺失證明」。</li>
+                            <li>攜帶兩吋大頭照 2 張。</li>
+                            <li>前往駐釜山辦事處申請補發護照或入國證明書。</li>
+                        </ol>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="https://www.google.com/maps/search/釜山" target="_blank" class="info-card p-4 flex flex-col items-center justify-center gap-2 hover:bg-green-50 transition"><i class="fa-solid fa-map-location-dot text-green-500 text-2xl"></i><span class="font-bold text-sm">Google Map</span></a>
+                        <a href="https://translate.google.com/?sl=auto&tl=ko&op=translate" target="_blank" class="info-card p-4 flex flex-col items-center justify-center gap-2 hover:bg-blue-50 transition"><i class="fa-solid fa-language text-blue-500 text-2xl"></i><span class="font-bold text-sm">Google 翻譯</span></a>
+                    </div>
+                </div>
+            `;
+            contentArea.innerHTML = emergencyHtml;
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
