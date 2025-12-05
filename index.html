@@ -13,7 +13,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
     <!--  mobile app -->
 
-
     <style>
         :root {
             --primary-orange: #FF9800;
@@ -167,8 +166,7 @@
     </div>
 
     <script>
-        require("dotenv").config();
-        const SHEET_CSV_URL = process.env.CSV_URL;
+        const SHEET_CSV_URL =  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSTEs6icuXX2w4iv1LerMbeW4EEDFqUJY_BdcVha7DEAMVtPXQ5blIHKZIIMK8U0O5pOV-rDO84Hns/pub?output=csv';
 
         let tripData = [];
         let activeIndex = 0; 
